@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from "react";
 
-export default function LoginPage() {
+export default function LoginPage() { 
   const router = useRouter();
 
   const [email, setEmail] = useState("");
