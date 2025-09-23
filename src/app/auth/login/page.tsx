@@ -1,8 +1,11 @@
 "use client";
 
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from "react";
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
@@ -25,6 +28,10 @@ export default function LoginPage() {
       setLoading(false);
       setMessage("(Simulação) Login enviado ao servidor");
     }, 800);
+  }
+
+  function irParaDashboard() {
+    router.push("/dashboard");
   }
 
   return (
@@ -59,7 +66,7 @@ export default function LoginPage() {
           </div>
 
           <div className="flex items-center justify-between">
-            <button disabled={loading} className="cursor-pointer px-4 py-2 rounded bg-slate-800 text-white">
+            <button disabled={loading} className="cursor-pointer px-4 py-2 rounded bg-slate-800 text-white"  onClick={irParaDashboard}>
               {loading ? "Entrando..." : "Entrar"}
             </button>
             <button type="button" className="cursor-pointer text-sm underline">
