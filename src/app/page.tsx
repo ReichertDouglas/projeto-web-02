@@ -5,9 +5,15 @@ export default function Home() {
   return (
     <div className="bg-emerald-300 text-emerald-800 font-serif w-full min-h-dvh p-9">
       <header className="flex w-full text-lg justify-between">
-        <h1 className="font-bold">Noble Finances</h1>
+        <h1 className="font-bold">FinTrack</h1>
         <div className="flex gap-8">
           <button className="hover:cursor-pointer">Serviços</button>
+          <Link
+            href="/login"
+            className="hover:cursor-pointer py-2"
+          >
+            Entrar
+          </Link>
           <Link
             href="/cadastro"
             className="bg-emerald-800 px-4 py-2 rounded-full text-white hover:cursor-pointer"

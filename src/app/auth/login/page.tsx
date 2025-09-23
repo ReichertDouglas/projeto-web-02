@@ -28,15 +28,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-white p-6">
-      <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-8">
-        <h2 className="text-2xl font-semibold text-center mb-6">Login • FinTrack</h2>
+    <div className="min-h-screen flex items-center font-serif justify-center bg-emerald-300 p-6">
+      <div className="w-full max-w-md bg-black/20 shadow-xl rounded-2xl text-emerald-800 p-8">
+        <h2 className="text-3xl font-semibold text-center mb-6">Login</h2>
 
         {message && <div className="mb-3 text-sm text-center text-slate-700">{message}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs">E-mail</label>
+            <label className="text-lg">E-mail</label>
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -47,7 +47,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="text-xs">Senha</label>
+            <label className="text-lg">Senha</label>
             <input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -55,11 +55,11 @@ export default function LoginPage() {
               className="w-full mt-1 p-2 border rounded"
               placeholder="Sua senha"
             />
-            {passwordError && <div className="text-xs text-red-500">{passwordError}</div>}
+            {passwordError && <div className="text-sm text-red-500">{passwordError}</div>}
           </div>
 
-          <div className="flex items-center justify-between">
-            <button disabled={loading} className="cursor-pointer px-4 py-2 rounded bg-slate-800 text-white">
+          <div className="flex gap-2 pt-4 items-center justify-between">
+            <button disabled={loading} className="cursor-pointer px-10 py-2 rounded bg-emerald-800 text-white">
               {loading ? "Entrando..." : "Entrar"}
             </button>
             <button type="button" className="cursor-pointer text-sm underline">
@@ -68,11 +68,11 @@ export default function LoginPage() {
           </div>
         </form>
 
-        <div className="mt-6 text-center">
-          <div className="text-xs text-slate-500 mb-2">Ou entre com</div>
+        <div className="mt-4 text-center">
+          <div className="text-sm text-emerald-800 mb-2">Ou entre com</div>
           <div className="flex gap-2 justify-center">
-            <button type="button" className="cursor-pointer border p-2 rounded w-24">Google</button>
-            <button type="button" className="cursor-pointer border p-2 rounded w-24">GitHub</button>
+            <button type="button" className="cursor-pointer border bg-black/10 p-2 rounded w-24">Google</button>
+            <button type="button" className="cursor-pointer border bg-black/10 p-2 rounded w-24">GitHub</button>
           </div>
         </div>
       </div>
