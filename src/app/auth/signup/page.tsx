@@ -25,7 +25,9 @@ export default function RegisterPage() {
   }, [cpf]);
 
   useEffect(() => {
-    setEmailError(validateEmail(email) || !email.length ? null : "E-mail inválido");
+    setEmailError(
+      validateEmail(email) || !email.length ? null : "E-mail inválido"
+    );
   }, [email]);
 
   useEffect(() => {
@@ -52,26 +54,34 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-white p-6">
-      <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-8">
-        <h2 className="text-2xl font-semibold text-center mb-6">Cadastro • FinTrack</h2>
+    <div className="min-h-screen flex items-center font-serif justify-center bg-emerald-300 p-6">
+      <div className="w-full max-w-md bg-black/20 text-emerald-800 shadow-xl rounded-2xl p-8">
+        <h2 className="text-3xl font-semibold text-center mb-6">
+          Cadastro
+        </h2>
 
-        {message && <div className="mb-3 text-sm text-center text-slate-700">{message}</div>}
+        {message && (
+          <div className="mb-3 text-sm text-center text-emerald-800">
+            {message}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs">Nome</label>
+            <label className="text-lg">Nome</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full mt-1 p-2 border rounded"
               placeholder="Seu nome completo"
             />
-            {nameError && <div className="text-xs text-red-500">{nameError}</div>}
+            {nameError && (
+              <div className="text-xs text-red-500">{nameError}</div>
+            )}
           </div>
 
           <div>
-            <label className="text-xs">CPF</label>
+            <label className="text-lg">CPF</label>
             <input
               value={cpf}
               onChange={(e) => setCpf(maskCPF(e.target.value))}
@@ -83,18 +93,20 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="text-xs">E-mail</label>
+            <label className="text-lg">E-mail</label>
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full mt-1 p-2 border rounded"
               placeholder="seu@exemplo.com"
             />
-            {emailError && <div className="text-xs text-red-500">{emailError}</div>}
+            {emailError && (
+              <div className="text-xs text-red-500">{emailError}</div>
+            )}
           </div>
 
           <div>
-            <label className="text-xs">Senha</label>
+            <label className="text-lg">Senha</label>
             <input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -102,12 +114,19 @@ export default function RegisterPage() {
               className="w-full mt-1 p-2 border rounded"
               placeholder="Mínimo 8 caracteres"
             />
-            <PasswordStrengthBar score={passwordStrength} />
-            {passwordError && <div className="text-xs text-red-500">{passwordError}</div>}
+            {password.length > 0 && (
+              <PasswordStrengthBar score={passwordStrength} />
+            )}
+            {passwordError && (
+              <div className="text-sm text-red-500">{passwordError}</div>
+            )}
           </div>
 
           <div className="flex items-center justify-between">
-            <button disabled={loading} className="cursor-pointer px-4 py-2 rounded bg-slate-800 text-white">
+            <button
+              disabled={loading}
+              className="cursor-pointer px-4 py-2 rounded bg-emerald-800 text-white"
+            >
               {loading ? "Cadastrando..." : "Criar conta"}
             </button>
           </div>
@@ -121,13 +140,15 @@ function PasswordStrengthBar({ score }: { score: number }) {
   const labels = ["Muito fraca", "Fraca", "Média", "Forte", "Muito forte"];
   return (
     <div className="mt-2">
-      <div className="h-2 bg-slate-100 rounded overflow-hidden">
+      <div className="h-2 bg-white/50 rounded overflow-hidden">
         <div
           style={{ width: `${(score / 4) * 100}%` }}
           className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600"
         ></div>
       </div>
-      <div className="text-xs mt-1 text-slate-500">{labels[Math.max(0, Math.min(4, score))]}</div>
+      <div className="text-sm mt-1 text-emerald-800">
+        {labels[Math.max(0, Math.min(4, score))]}
+      </div>
     </div>
   );
 }
@@ -137,7 +158,9 @@ function validateEmail(email: string) {
 }
 
 function validatePassword(pw: string) {
-  if (pw.length < 8) return { score: 0, error: "A senha deve ter ao menos 8 caracteres" };
+  if (pw.length == 0) return { score: 0, error: null };
+  if (pw.length < 8)
+    return { score: 0, error: "A senha deve ter ao menos 8 caracteres" };
   let score = 0;
   if (/[0-9]/.test(pw)) score++;
   if (/[a-z]/.test(pw)) score++;
@@ -150,8 +173,13 @@ function validatePassword(pw: string) {
 function maskCPF(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 11);
   let out = digits;
-  if (digits.length > 9) out = `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
-  else if (digits.length > 6) out = `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  if (digits.length > 9)
+    out = `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(
+      6,
+      9
+    )}-${digits.slice(9)}`;
+  else if (digits.length > 6)
+    out = `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
   else if (digits.length > 3) out = `${digits.slice(0, 3)}.${digits.slice(3)}`;
   return out;
 }
