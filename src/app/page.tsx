@@ -7,7 +7,6 @@ export default function Home() {
       <header className="flex w-full text-lg justify-between">
         <h1 className="font-bold">FinTrack</h1>
         <div className="flex gap-8">
-          <button className="hover:cursor-pointer">Serviços</button>
           <Link
             href="/login"
             className="hover:cursor-pointer py-2"
