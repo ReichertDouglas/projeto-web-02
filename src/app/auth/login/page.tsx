@@ -1,9 +1,9 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 
-export default function LoginPage() { 
+export default function LoginPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -14,7 +14,9 @@ export default function LoginPage() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    setEmailError(validateEmail(email) || !email.length ? null : "E-mail inválido");
+    setEmailError(
+      validateEmail(email) || !email.length ? null : "E-mail inválido"
+    );
   }, [email]);
 
   function handleSubmit(e: React.FormEvent) {
@@ -39,7 +41,11 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-black/20 shadow-xl rounded-2xl text-emerald-800 p-8">
         <h2 className="text-3xl font-semibold text-center mb-6">Login</h2>
 
-        {message && <div className="mb-3 text-sm text-center text-slate-700">{message}</div>}
+        {message && (
+          <div className="mb-3 text-sm text-center text-slate-700">
+            {message}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -50,7 +56,9 @@ export default function LoginPage() {
               className="w-full mt-1 p-2 border rounded"
               placeholder="seu@exemplo.com"
             />
-            {emailError && <div className="text-xs text-red-500">{emailError}</div>}
+            {emailError && (
+              <div className="text-xs text-red-500">{emailError}</div>
+            )}
           </div>
 
           <div>
@@ -62,11 +70,17 @@ export default function LoginPage() {
               className="w-full mt-1 p-2 border rounded"
               placeholder="Sua senha"
             />
-            {passwordError && <div className="text-sm text-red-500">{passwordError}</div>}
+            {passwordError && (
+              <div className="text-sm text-red-500">{passwordError}</div>
+            )}
           </div>
 
           <div className="flex gap-2 pt-4 items-center justify-between">
-            <button disabled={loading} className="cursor-pointer px-10 py-2 rounded bg-emerald-800 text-white">
+            <button
+              disabled={loading}
+              className="cursor-pointer px-10 py-2 rounded bg-emerald-800 text-white"
+              onClick={irParaDashboard}
+            >
               {loading ? "Entrando..." : "Entrar"}
             </button>
             <button type="button" className="cursor-pointer text-sm underline">
@@ -78,8 +92,18 @@ export default function LoginPage() {
         <div className="mt-4 text-center">
           <div className="text-sm text-emerald-800 mb-2">Ou entre com</div>
           <div className="flex gap-2 justify-center">
-            <button type="button" className="cursor-pointer border bg-black/10 p-2 rounded w-24">Google</button>
-            <button type="button" className="cursor-pointer border bg-black/10 p-2 rounded w-24">GitHub</button>
+            <button
+              type="button"
+              className="cursor-pointer border bg-black/10 p-2 rounded w-24"
+            >
+              Google
+            </button>
+            <button
+              type="button"
+              className="cursor-pointer border bg-black/10 p-2 rounded w-24"
+            >
+              GitHub
+            </button>
           </div>
         </div>
       </div>
