@@ -1,202 +1,171 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signupSchema, type SignupFormData } from "../../../lib/validation/loginschema";
+import { submitUserForm } from "../../../lib/actions/submituserformaction";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 
-export default function RegisterPage() {
-  const [name, setName] = useState("");
-  const [cpf, setCpf] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+export default function SignupPage() {
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const [nameError, setNameError] = useState<string | null>(null);
-  const [cpfError, setCpfError] = useState<string | null>(null);
-  const [emailError, setEmailError] = useState<string | null>(null);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [passwordStrength, setPasswordStrength] = useState<number>(0);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-  useEffect(() => {
-    setNameError(name.length >= 2 || !name.length ? null : "Nome muito curto");
-  }, [name]);
+  const onSubmit = async (data: SignupFormData) => {
+    setError(null);
+    setSuccess(null);
 
-  useEffect(() => {
-    setCpfError(cpf.length ? (validateCPF(cpf) ? null : "CPF inválido") : null);
-  }, [cpf]);
+    const result = await submitUserForm(data);
 
-  useEffect(() => {
-    setEmailError(
-      validateEmail(email) || !email.length ? null : "E-mail inválido"
-    );
-  }, [email]);
-
-  useEffect(() => {
-    const { score, error } = validatePassword(password);
-    setPasswordStrength(score);
-    setPasswordError(error);
-  }, [password]);
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setMessage(null);
-
-    if (!validateEmail(email)) return setEmailError("E-mail inválido");
-    const pw = validatePassword(password);
-    if (pw.error) return setPasswordError(pw.error);
-    if (!name.trim()) return setNameError("Nome obrigatório");
-    if (!validateCPF(cpf)) return setCpfError("CPF inválido");
-
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setMessage("(Simulação) Cadastro enviado ao servidor");
-    }, 800);
-  }
+    if (!result.success) {
+      setError(result.error ?? "Erro ao cadastrar.");
+    } else {
+      setSuccess(result.message ?? "Cadastro realizado com sucesso.");
+      setTimeout(() => router.push("/login"), 2000);
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center font-serif justify-center bg-emerald-300 p-6">
-      <div className="w-full max-w-md bg-black/20 text-emerald-800 shadow-xl rounded-2xl p-8">
-        <h2 className="text-3xl font-semibold text-center mb-6">
-          Cadastro
-        </h2>
+    <div className="min-h-screen flex items-center justify-center bg-emerald-300 p-6 font-serif">
+      <div className="w-full max-w-md bg-white/70 shadow-xl rounded-2xl text-emerald-800 p-8">
+        <h2 className="text-3xl font-semibold text-center mb-6">Criar Conta</h2>
 
-        {message && (
-          <div className="mb-3 text-sm text-center text-emerald-800">
-            {message}
-          </div>
-        )}
+        {error && <p className="text-sm text-red-600 text-center mb-4">{error}</p>}
+        {success && <p className="text-sm text-green-600 text-center mb-4">{success}</p>}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Email */}
           <div>
-            <label className="text-lg">Nome</label>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full mt-1 p-2 border rounded"
-              placeholder="Seu nome completo"
-            />
-            {nameError && (
-              <div className="text-xs text-red-500">{nameError}</div>
+            <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+              E-mail
+            </label>
+            <div className="relative mt-1">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <Mail className="h-5 w-5 text-gray-400" />
+              </div>
+              <Controller
+                name="email"
+                control={control}
+                render={({ field }) => (
+                  <input
+                    {...field}
+                    id="email"
+                    type="email"
+                    placeholder="seu.email@exemplo.com"
+                    className="block w-full rounded-md border-gray-300 pl-10 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                )}
+              />
+            </div>
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
             )}
           </div>
 
+          {/* Senha */}
           <div>
-            <label className="text-lg">CPF</label>
-            <input
-              value={cpf}
-              onChange={(e) => setCpf(maskCPF(e.target.value))}
-              maxLength={14}
-              className="w-full mt-1 p-2 border rounded"
-              placeholder="000.000.000-00"
-            />
-            {cpfError && <div className="text-xs text-red-500">{cpfError}</div>}
-          </div>
-
-          <div>
-            <label className="text-lg">E-mail</label>
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full mt-1 p-2 border rounded"
-              placeholder="seu@exemplo.com"
-            />
-            {emailError && (
-              <div className="text-xs text-red-500">{emailError}</div>
+            <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+              Senha
+            </label>
+            <div className="relative mt-1">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <Lock className="h-5 w-5 text-gray-400" />
+              </div>
+              <Controller
+                name="password"
+                control={control}
+                render={({ field }) => (
+                  <input
+                    {...field}
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Digite sua senha"
+                    className="block w-full rounded-md border-gray-300 pl-10 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                )}
+              />
+            </div>
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
             )}
           </div>
 
+          {/* Confirmar Senha */}
           <div>
-            <label className="text-lg">Senha</label>
-            <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              type="password"
-              className="w-full mt-1 p-2 border rounded"
-              placeholder="Mínimo 8 caracteres"
-            />
-            {password.length > 0 && (
-              <PasswordStrengthBar score={passwordStrength} />
-            )}
-            {passwordError && (
-              <div className="text-sm text-red-500">{passwordError}</div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700">
+              Confirmar Senha
+            </label>
+            <div className="relative mt-1">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <Lock className="h-5 w-5 text-gray-400" />
+              </div>
+              <Controller
+                name="confirmPassword"
+                control={control}
+                render={({ field }) => (
+                  <input
+                    {...field}
+                    id="confirmPassword"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Repita a senha"
+                    className="block w-full rounded-md border-gray-300 pl-10 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                )}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5 text-gray-500" />
+                ) : (
+                  <Eye className="h-5 w-5 text-gray-500" />
+                )}
+              </button>
+            </div>
+            {errors.confirmPassword && (
+              <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
             )}
           </div>
 
-          <div className="flex items-center justify-between">
+          {/* Botão de cadastro */}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-indigo-600 text-white py-2 rounded-md text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
+          >
+            {isSubmitting ? "Cadastrando..." : "Cadastrar"}
+          </button>
+
+          {/* Voltar para login */}
+          <div className="text-center mt-4">
             <button
-              disabled={loading}
-              className="cursor-pointer px-4 py-2 rounded bg-emerald-800 text-white"
+              type="button"
+              onClick={() => router.push("/")}
+              className="text-sm text-indigo-600 hover:underline"
             >
-              {loading ? "Cadastrando..." : "Criar conta"}
+              Já tem conta? Entrar
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-}
-
-function PasswordStrengthBar({ score }: { score: number }) {
-  const labels = ["Muito fraca", "Fraca", "Média", "Forte", "Muito forte"];
-  return (
-    <div className="mt-2">
-      <div className="h-2 bg-white/50 rounded overflow-hidden">
-        <div
-          style={{ width: `${(score / 4) * 100}%` }}
-          className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600"
-        ></div>
-      </div>
-      <div className="text-sm mt-1 text-emerald-800">
-        {labels[Math.max(0, Math.min(4, score))]}
-      </div>
-    </div>
-  );
-}
-
-function validateEmail(email: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function validatePassword(pw: string) {
-  if (pw.length == 0) return { score: 0, error: null };
-  if (pw.length < 8)
-    return { score: 0, error: "A senha deve ter ao menos 8 caracteres" };
-  let score = 0;
-  if (/[0-9]/.test(pw)) score++;
-  if (/[a-z]/.test(pw)) score++;
-  if (/[A-Z]/.test(pw)) score++;
-  if (/[^A-Za-z0-9]/.test(pw)) score++;
-  const error = pw.length >= 8 ? null : "Senha muito curta";
-  return { score: Math.min(4, score), error };
-}
-
-function maskCPF(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 11);
-  let out = digits;
-  if (digits.length > 9)
-    out = `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(
-      6,
-      9
-    )}-${digits.slice(9)}`;
-  else if (digits.length > 6)
-    out = `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
-  else if (digits.length > 3) out = `${digits.slice(0, 3)}.${digits.slice(3)}`;
-  return out;
-}
-
-function validateCPF(raw: string) {
-  const cpf = raw.replace(/\D/g, "");
-  if (!cpf || cpf.length !== 11) return false;
-  if (/^(\d)\1{10}$/.test(cpf)) return false;
-  let sum = 0;
-  for (let i = 0; i < 9; i++) sum += parseInt(cpf[i]) * (10 - i);
-  let first = (sum * 10) % 11;
-  if (first === 10) first = 0;
-  if (first !== parseInt(cpf[9])) return false;
-  sum = 0;
-  for (let i = 0; i < 10; i++) sum += parseInt(cpf[i]) * (11 - i);
-  let second = (sum * 10) % 11;
-  if (second === 10) second = 0;
-  if (second !== parseInt(cpf[10])) return false;
-  return true;
 }
