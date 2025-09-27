@@ -68,7 +68,7 @@ export default function SignupPage() {
                     id="email"
                     type="email"
                     placeholder="seu.email@exemplo.com"
-                    className="block w-full rounded-md border-gray-300 pl-10 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-md border-gray-300 pl-10 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   />
                 )}
               />
@@ -96,7 +96,7 @@ export default function SignupPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Digite sua senha"
-                    className="block w-full rounded-md border-gray-300 pl-10 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-md border-gray-300 pl-10 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   />
                 )}
               />
@@ -124,7 +124,7 @@ export default function SignupPage() {
                     id="confirmPassword"
                     type={showPassword ? "text" : "password"}
                     placeholder="Repita a senha"
-                    className="block w-full rounded-md border-gray-300 pl-10 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-md border-gray-300 pl-10 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   />
                 )}
               />
@@ -149,17 +149,17 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-indigo-600 text-white py-2 rounded-md text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
+            className="w-full mt-4 bg-emerald-600 text-white py-2 rounded-md text-sm font-medium hover:bg-emerald-700 disabled:opacity-50"
           >
             {isSubmitting ? "Cadastrando..." : "Cadastrar"}
           </button>
 
           {/* Voltar para login */}
-          <div className="text-center mt-4">
+          <div className="text-center">
             <button
               type="button"
               onClick={() => router.push("/")}
-              className="text-sm text-indigo-600 hover:underline"
+              className="text-sm text-emerald-600 hover:underline"
             >
               Já tem conta? Entrar
             </button>

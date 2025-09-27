@@ -97,13 +97,13 @@ export default function DashboardPage() {
         </section>
 
         {/* Gráficos */}
-        <section className="bg-black/20 shadow rounded-2xl p-6 mb-10">
+        <section className="bg-white/70 shadow rounded-2xl p-6 mb-10">
           <h2 className="text-xl font-semibold mb-4">
             Distribuição de Despesas
           </h2>
           <div className="grid md:grid-cols-2 gap-6">
             {/* Placeholder gráfico de pizza */}
-            <div className="h-64 flex items-center justify-center text-emerald-800 border rounded">
+            <div className="h-full flex items-center justify-center bg-white/50 text-emerald-800 border rounded">
               <PizzaGraph data={despesasCategoria} />
             </div>
             {/* Tabela resumo */}
@@ -127,7 +127,7 @@ export default function DashboardPage() {
         </section>
 
         {/* Alertas de Vencimentos */}
-        <section className="bg-black/20 shadow rounded-2xl p-6 mb-10">
+        <section className="bg-white/70 shadow rounded-2xl p-6 mb-10">
           <h2 className="text-xl font-semibold mb-4">Contas a Vencer</h2>
           {alertas.length === 0 ? (
             <p className="text-emerald-800">
@@ -151,7 +151,7 @@ export default function DashboardPage() {
         </section>
 
         {/* Cotações */}
-        <section className="bg-black/20 shadow rounded-2xl p-6">
+        <section className="bg-white/70 shadow rounded-2xl p-6">
           <h2 className="text-xl font-semibold mb-4">Cotações</h2>
           <div className="flex gap-10">
             <div>
@@ -183,7 +183,7 @@ function Card({
   color: string;
 }) {
   return (
-    <div className="bg-black/20 shadow rounded-2xl p-6 flex flex-col items-center justify-center">
+    <div className="bg-white/70 shadow rounded-2xl p-6 flex flex-col items-center justify-center">
       <h3 className="text-lg text-emerald-800 mb-2">{title}</h3>
       <p className={`text-2xl font-bold ${color}`}>{value}</p>
     </div>

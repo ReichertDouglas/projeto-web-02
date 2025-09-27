@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <div className="bg-emerald-300 text-emerald-800 font-serif w-full min-h-dvh p-9">
       <header className="flex w-full text-lg justify-between">
-        <h1 className="font-bold">FinTrack</h1>
+        <h1 className="font-bold text-2xl">FinTrack</h1>
         <div className="flex gap-8">
           <Link
             href="/login"

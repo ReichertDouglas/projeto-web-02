@@ -6,7 +6,8 @@ import React, { useState } from "react";
 import { sendPasswordResetAction, signInAction } from "../../../lib/actions/useauth";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Github } from "lucide-react";
+import { BsGoogle } from "react-icons/bs";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -54,7 +55,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center font-serif justify-center bg-emerald-300 p-6">
-      <div className="w-full max-w-md bg-black/20 shadow-xl rounded-2xl text-emerald-800 p-8">
+      <div className="w-full max-w-md bg-white/70 shadow-xl rounded-2xl text-emerald-800 p-8">
         <h2 className="text-3xl font-semibold text-center mb-6">Login</h2>
 
         {error && <p className="text-sm text-red-600 text-center mb-2">{error}</p>}
@@ -79,7 +80,7 @@ export default function LoginPage() {
                     id="email"
                     type="email"
                     placeholder="seu.email@exemplo.com"
-                    className="block w-full rounded-md border-gray-300 pl-10 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-md border-gray-300 pl-10 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   />
                 )}
               />
@@ -107,7 +108,7 @@ export default function LoginPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Sua senha"
-                    className="block w-full rounded-md border-gray-300 pl-10 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-md border-gray-300 pl-10 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   />
                 )}
               />
@@ -133,7 +134,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={handleForgotPassword}
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+                className="font-medium text-emerald-600 hover:text-emerald-500"
               >
                 Esqueceu sua senha?
               </button>
@@ -144,7 +145,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+              className="flex w-full justify-center rounded-md border border-transparent bg-emerald-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
             >
               {isSubmitting ? "Entrando..." : "Entrar"}
             </button>
@@ -156,7 +157,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => router.push("/signup")}
-                className="font-medium text-indigo-600 hover:underline"
+                className="font-medium text-emerald-600 hover:underline"
               >
                 Cadastre-se
               </button>
@@ -169,14 +170,16 @@ export default function LoginPage() {
           <div className="flex gap-2 justify-center">
             <button
               type="button"
-              className="cursor-pointer border bg-black/10 p-2 rounded w-24"
+              className="cursor-pointer border bg-black/10 hover:shadow-lg p-2 rounded w-32 flex items-center justify-center gap-1"
             >
+              <BsGoogle />
               Google
             </button>
             <button
               type="button"
-              className="cursor-pointer border bg-black/10 p-2 rounded w-24"
+              className="cursor-pointer border bg-black/10 hover:shadow-lg p-2 rounded w-32 flex items-center justify-center gap-1"
             >
+              <Github/>
               GitHub
             </button>
           </div>
