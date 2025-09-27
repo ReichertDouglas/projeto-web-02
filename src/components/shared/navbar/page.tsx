@@ -12,7 +12,7 @@ export const Navbar = () => {
         </Link>
         <Link href="/profile" className="w-3/12 py-1 hover:bg-black/10 rounded-xl text-center">Perfil</Link>
       </div>
-      <Link href="/logout" className="w-3/12 py-1 bg-emerald-800 rounded-xl text-center text-white">
+      <Link href="/" className="w-3/12 py-1 bg-emerald-800 rounded-xl text-center text-white">
         Logout
       </Link>
     </div>
