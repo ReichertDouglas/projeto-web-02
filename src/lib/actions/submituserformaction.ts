@@ -9,6 +9,7 @@ import { signUpWithEmailAndPassword } from "./useauth";
 export const submitUserForm = async (data: SignupFormData) => {
   try {
     const signUpResult = await signUpWithEmailAndPassword({
+      name: data.name,
       email: data.email,
       password: data.password,
       confirmPassword: data.confirmPassword,

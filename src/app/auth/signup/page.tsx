@@ -21,6 +21,7 @@ export default function SignupPage() {
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -50,6 +51,33 @@ export default function SignupPage() {
         {success && <p className="text-sm text-green-600 text-center mb-4">{success}</p>}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Name */}
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-slate-700">
+              Nome completo
+            </label>
+            <div className="relative mt-1">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <Mail className="h-5 w-5 text-gray-400" />
+              </div>
+              <Controller
+                name="name"
+                control={control}
+                render={({ field }) => (
+                  <input
+                    {...field}
+                    id="name"
+                    type="name"
+                    placeholder="Digite seu nome completo"
+                    className="block w-full rounded-md border-gray-300 pl-10 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                )}
+              />
+            </div>
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-600">{errors.name?.message}</p>
+            )}
+          </div>
           {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-slate-700">
@@ -158,7 +186,7 @@ export default function SignupPage() {
           <div className="text-center">
             <button
               type="button"
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/login")}
               className="text-sm text-emerald-600 hover:underline"
             >
               Já tem conta? Entrar
