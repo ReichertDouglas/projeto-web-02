@@ -3,10 +3,10 @@
 import { type LoginFormData, loginSchema } from "../../../lib/validation/loginschema";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import { sendPasswordResetAction, signInAction } from "../../../lib/actions/useauth";
+import { sendPasswordResetAction, signInAction, signInWithGitHub, signInWithGoogle } from "../../../lib/actions/useauth";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, Lock, Eye, EyeOff, Github } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Github, Loader2 } from "lucide-react";
 import { BsGoogle } from "react-icons/bs";
 
 export default function LoginPage() {
@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [loadingProvider, setLoadingProvider] = useState<"google" | "github" | null>(null);
 
   const {
     control,
@@ -27,6 +28,7 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     setError(null);
+    setSuccess(null)
     const result = await signInAction(data);
     if (!result.success) {
       setError(result.error || "Falha no login.");
@@ -47,9 +49,52 @@ export default function LoginPage() {
 
     const result = await sendPasswordResetAction(email);
     if (result.success) {
-      setSuccess(result.message ?? null);
+      setSuccess(result.message ?? "E-mail de recuperação enviado com sucesso!");
     } else {
-      setError(result.error ?? null);
+      setError(result.error ?? "Erro ao enviar e-mail de recuperação.");
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError(null);
+    setSuccess(null);
+    setLoadingProvider("google");
+
+    try {
+      const result = await signInWithGoogle();
+      if (result.success) {
+        setSuccess("Login com Google realizado com sucesso!");
+        setTimeout(() => router.push("/dashboard"), 1000);
+      } else {
+        setError(result.error || "Falha no login com Google.");
+      }
+    } catch (error) {
+      setError("Erro inesperado ao fazer login com Google.");
+      console.error("Google login error:", error);
+    } finally {
+      setLoadingProvider(null);
+    }
+  };
+
+  const handleGitHubLogin = async () => {
+    setError(null);
+    setSuccess(null);
+    setLoadingProvider("github");
+
+    try {
+      const result = await signInWithGitHub();
+      console.log(result)
+      if (result.success) {
+        setSuccess("Login com GitHub realizado com sucesso!");
+        setTimeout(() => router.push("/dashboard"), 1000);
+      } else {
+        setError(result.error || "Falha no login com GitHub.");
+      }
+    } catch (error) {
+      setError("Erro inesperado ao fazer login com GitHub.");
+      console.error("GitHub login error:", error);
+    } finally {
+      setLoadingProvider(null);
     }
   };
 
@@ -147,7 +192,14 @@ export default function LoginPage() {
               disabled={isSubmitting}
               className="flex w-full justify-center rounded-md border border-transparent bg-emerald-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
             >
-              {isSubmitting ? "Entrando..." : "Entrar"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                  Entrando...
+                </>
+              ) : (
+                "Entrar"
+              )}
             </button>
           </div>
 
@@ -170,17 +222,33 @@ export default function LoginPage() {
           <div className="flex gap-2 justify-center">
             <button
               type="button"
+              onClick={handleGoogleLogin}
+              disabled={loadingProvider !== null}
               className="cursor-pointer border bg-black/10 hover:shadow-lg p-2 rounded w-32 flex items-center justify-center gap-1"
             >
-              <BsGoogle />
-              Google
+              {loadingProvider === "google" ? (
+                <Loader2 className="animate-spin h-4 w-4" />
+              ) : (
+                <BsGoogle className="h-4 w-4" />
+              )}
+              <span className="text-sm font-medium">
+                {loadingProvider === "google" ? "Conectando..." : "Google"}
+              </span>
             </button>
             <button
               type="button"
+              onClick={handleGitHubLogin}
+              disabled={loadingProvider !== null}
               className="cursor-pointer border bg-black/10 hover:shadow-lg p-2 rounded w-32 flex items-center justify-center gap-1"
             >
-              <Github/>
-              GitHub
+              {loadingProvider === "github" ? (
+                <Loader2 className="animate-spin h-4 w-4" />
+              ) : (
+                <Github className="h-4 w-4" />
+              )}
+              <span className="text-sm font-medium">
+                {loadingProvider === "github" ? "Conectando..." : "GitHub"}
+              </span>
             </button>
           </div>
         </div>
