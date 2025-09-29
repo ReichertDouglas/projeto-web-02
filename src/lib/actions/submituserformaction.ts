@@ -8,6 +8,7 @@ export const submitUserForm = async (data: SignupFormData) => {
   try {
     const signUpResult = await signUpWithEmailAndPassword({
       name: data.name,
+      cpf: data.cpf,
       email: data.email,
       password: data.password,
       confirmPassword: data.confirmPassword,
@@ -16,7 +17,7 @@ export const submitUserForm = async (data: SignupFormData) => {
     if (!signUpResult.success) {
       return { success: false, error: signUpResult.error };
     }
-    
+
     return { success: true, message: "Conta criada e dados salvos com sucesso!" };
     
   } catch (error) {

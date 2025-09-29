@@ -6,7 +6,10 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, type SignupFormData } from "../../../lib/validation/loginschema";
 import { submitUserForm } from "../../../lib/actions/submituserformaction";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, IdCard } from "lucide-react";
+import { CPF_MASK } from "@/lib/mask";
+import { IMaskInput } from "react-imask";
+import { handleCpfVerify } from "@/lib/services/api/cpfvercel";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -22,6 +25,7 @@ export default function SignupPage() {
     resolver: zodResolver(signupSchema),
     defaultValues: {
       name: "",
+      cpf: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -76,6 +80,40 @@ export default function SignupPage() {
             </div>
             {errors.email && (
               <p className="mt-1 text-sm text-red-600">{errors.name?.message}</p>
+            )}
+          </div>
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-slate-700">
+              CPF
+            </label>
+            <div className="relative mt-1">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <IdCard className="h-5 w-5 text-gray-400" />
+              </div>
+              <Controller
+                name="cpf"
+                control={control}
+                render={({ field }) => (
+                  <IMaskInput
+                  {...field}
+                  mask={CPF_MASK}
+                  id="cpf"
+                  placeholder="000.000.000-00"
+                  onAccept={(value) => field.onChange(value)}
+                  onBlur={async (e) => {
+                    const message = await handleCpfVerify(e.currentTarget.value);
+                    console.log(message);
+                    if (message === "CPF inválido.") {
+                      setError(message);
+                    }
+                  }}
+                  className="block w-full rounded-md border-gray-300 pl-10 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                />
+                )}
+              />
+            </div>
+            {errors.cpf && (
+              <p className="mt-1 text-sm text-red-600">{errors.cpf?.message}</p>
             )}
           </div>
           {/* Email */}
