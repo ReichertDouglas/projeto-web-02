@@ -42,6 +42,7 @@ export const signUpWithEmailAndPassword = async (data: SignupFormData) => {
     await setDoc(doc(db, "users", user.uid), {
       email: data.email,
       name: data.name || "",
+      cpf: data.cpf || "",
       emailVerified: false,
       createdAt: serverTimestamp(),
       lastLogin: serverTimestamp(),
