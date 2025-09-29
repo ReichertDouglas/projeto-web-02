@@ -5,6 +5,7 @@ import { PizzaGraph } from "@/components/features/dashboard/PizzaGraph";
 import { Header } from "@/components/shared/header";
 import { Navbar } from "@/components/shared/navbar/page";
 import { auth, db } from "@/lib/firebase/firebaseconfig";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -40,16 +41,24 @@ export default function DashboardPage() {
     { categoria: "Saúde", valor: 0 },
     { categoria: "Outros", valor: 0 },
   ]);
+  const [user, setUser] = useState<User | null>(auth.currentUser);
 
   useEffect(() => {
-    const user = auth.currentUser;
-    if (!user) {
-      router.push("/login");
-      return;
-    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const unLogged = onAuthStateChanged(auth, (userLogged) => {
+      if (!userLogged) {
+        router.push("/login");
+      } else {
+        setUser(userLogged);
+      }
+    });
+  });
+
+  useEffect(() => {
+    if (!user?.uid) return;
 
     const q = query(
-      collection(db, "transactions", user.uid, "items"),
+      collection(db, "transactions", user?.uid, "items"),
       orderBy("createdAt", "desc")
     );
 
@@ -111,7 +120,7 @@ export default function DashboardPage() {
       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       unsubscribe(), bills();
     };
-  }, [router]);
+  }, [user]);
 
   const [dolar, setDolar] = useState<string>("Carregando...");
   const [cripto, setCripto] = useState<cotacao>();
@@ -135,7 +144,6 @@ export default function DashboardPage() {
     async function fetchCripto() {
       try {
         const valor = await getCripto();
-        console.log(valor);
         if (valor !== "Cotação não encontrada") {
           setCripto(valor);
         } else {
@@ -207,23 +215,14 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {despesasCategoria.map((d) => (
-                  <>
-                    {d.valor !== 0 ? (
-                      <>
-                        <tr
-                          key={d.categoria}
-                          className="border-b last:border-none"
-                        >
-                          <td className="py-2">{d.categoria}</td>
-                          <td className="py-2">R$ {d.valor.toFixed(2)}</td>
-                        </tr>
-                      </>
-                    ) : (
-                      <></>
-                    )}
-                  </>
-                ))}
+                {despesasCategoria
+                  .filter((d) => d.valor !== 0)
+                  .map((d) => (
+                    <tr key={d.categoria} className="border-b last:border-none">
+                      <td className="py-2">{d.categoria}</td>
+                      <td className="py-2">R$ {d.valor.toFixed(2)}</td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>

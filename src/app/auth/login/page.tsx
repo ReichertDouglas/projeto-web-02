@@ -40,13 +40,18 @@ export default function LoginPage() {
     setError(null);
     setSuccess(null);
     const result = await signInAction(data);
-    if (result.user?.uid !== undefined) {
-          localStorage.setItem("uid", result.user?.uid);
-        }
-    if (!result.success) {
-      setError(result.error || "Falha no login.");
+    if (result.success  && result.user?.emailVerified) {
+      setSuccess("Login realizado com sucesso!");
+      if (result.user?.uid !== undefined) {
+        localStorage.setItem("uid", result.user?.uid);
+      }
+      setTimeout(() => router.push("/dashboard"), 1000);
     } else {
-      router.push("/dashboard");
+      if (!result.user?.emailVerified) {
+        setError("Verifique seu e-mail e tente novamente");
+      } else {
+        setError(result.error || "Falha no login.");
+      }
     }
   };
 
@@ -77,14 +82,18 @@ export default function LoginPage() {
 
     try {
       const result = await signInWithGoogle();
-      if (result.success) {
+      if (result.success  && result.user?.emailVerified) {
         setSuccess("Login com Google realizado com sucesso!");
         if (result.user?.uid !== undefined) {
           localStorage.setItem("uid", result.user?.uid);
         }
         setTimeout(() => router.push("/dashboard"), 1000);
       } else {
-        setError(result.error || "Falha no login com Google.");
+        if (!result.user?.emailVerified) {
+          setError("Verifique seu e-mail e tente novamente");
+        } else {
+          setError(result.error || "Falha no login com Google.");
+        }
       }
     } catch (error) {
       setError("Erro inesperado ao fazer login com Google.");
@@ -101,15 +110,18 @@ export default function LoginPage() {
 
     try {
       const result = await signInWithGitHub();
-      console.log(result);
-      if (result.success) {
+      if (result.success && result.user?.emailVerified) {
         setSuccess("Login com GitHub realizado com sucesso!");
         if (result.user?.uid !== undefined) {
           localStorage.setItem("uid", result.user?.uid);
         }
         setTimeout(() => router.push("/dashboard"), 1000);
       } else {
-        setError(result.error || "Falha no login com GitHub.");
+        if (!result.user?.emailVerified) {
+          setError("Verifique seu e-mail e tente novamente");
+        } else {
+          setError(result.error || "Falha no login com GitHub.");
+        }
       }
     } catch (error) {
       setError("Erro inesperado ao fazer login com GitHub.");

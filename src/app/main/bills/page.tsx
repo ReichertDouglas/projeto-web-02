@@ -3,23 +3,35 @@
 import { Header } from "@/components/shared/header";
 import { Navbar } from "@/components/shared/navbar/page";
 import { auth, db } from "@/lib/firebase/firebaseconfig";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function BillsPage() {
   const router = useRouter();
-
   const [description, setDescription] = useState("");
   const [value, setValue] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  const [user, setUser] = useState<User | null>(auth.currentUser);
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const unLogged = onAuthStateChanged(auth, (userLogged) => {
+      if (!userLogged) {
+        router.push("/login");
+      } else {
+        setUser(userLogged);
+      }
+    });
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const user = auth.currentUser;
     if (!user) {
       router.push("/login");
       return;

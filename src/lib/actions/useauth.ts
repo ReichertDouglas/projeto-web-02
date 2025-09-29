@@ -15,37 +15,30 @@ import { LoginFormData, SignupFormData } from "../validation/loginschema";
 import { googleProvider, githubProvider } from "../firebase/firebaseconfig";
 import { signInWithPopup } from "firebase/auth";
 
-// ✅ CADASTRO SEGURO
 export const signUpWithEmailAndPassword = async (data: SignupFormData) => {
   try {
-    // ✅ Log seguro (sem expor dados sensíveis)
     console.log("Tentativa de cadastro para:", data.email);
     
-    // ✅ Validar dados antes de enviar para o Firebase
     if (!data.email || !data.password) {
       return { success: false, error: "Email e senha são obrigatórios." };
     }
-
-    // ✅ Criar usuário no Authentication
+ 
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       data.email,
       data.password
     );
-
+    
     const user = userCredential.user;
-
-    // ✅ Atualizar perfil com nome (se existir)
+    
     if (data.name) {
       await updateProfile(user, {
         displayName: data.name
       });
     }
-
-    // ✅ Enviar verificação de email
+    
     await sendEmailVerification(user);
-
-    // ✅ SALVAR DADOS NO FIRESTORE (SEM SENHA!)
+    
     await setDoc(doc(db, "users", user.uid), {
       email: data.email,
       name: data.name || "",
@@ -55,8 +48,7 @@ export const signUpWithEmailAndPassword = async (data: SignupFormData) => {
       provider: "email",
       updatedAt: serverTimestamp()
     }, { merge: true });
-
-    // ✅ Log de sucesso seguro
+    
     console.log("Usuário cadastrado com sucesso:", user.uid);
 
     return { 
@@ -65,7 +57,6 @@ export const signUpWithEmailAndPassword = async (data: SignupFormData) => {
     };
 
   } catch (error) {
-    // ✅ Log de erro seguro
     console.error("Erro no cadastro:", error instanceof Error ? error.message : "Erro desconhecido");
 
     let errorMessage = "Ocorreu um erro ao criar a conta.";
@@ -96,10 +87,8 @@ export const signUpWithEmailAndPassword = async (data: SignupFormData) => {
   }
 };
 
-// ✅ LOGIN SEGURO
 export const signInAction = async (data: LoginFormData) => {
   try {
-    // ✅ Validar dados
     if (!data.email || !data.password) {
       return { success: false, error: "Email e senha são obrigatórios." };
     }
@@ -112,18 +101,10 @@ export const signInAction = async (data: LoginFormData) => {
 
     const user = userCredential.user;
 
-    // ✅ Atualizar último login no Firestore
     await setDoc(doc(db, "users", user.uid), {
       lastLogin: serverTimestamp(),
       updatedAt: serverTimestamp()
     }, { merge: true });
-
-    // ✅ Verificar se o email foi verificado
-    if (!user.emailVerified) {
-      console.log("Usuário logado mas email não verificado:", user.uid);
-      // Você pode optar por não permitir login sem verificação
-      // return { success: false, error: "Verifique seu email antes de fazer login." };
-    }
 
     return { 
       success: true,
@@ -168,17 +149,14 @@ export const signInAction = async (data: LoginFormData) => {
   }
 };
 
-// ✅ REDEFINIÇÃO DE SENHA SEGURA
 export const sendPasswordResetAction = async (email: string) => {
   try {
-    // ✅ Validar email
     if (!email || !email.includes('@')) {
       return { success: false, error: "Por favor, informe um e-mail válido." };
     }
 
     await sendPasswordResetEmail(auth, email);
 
-    // ✅ Log seguro
     console.log("Email de redefinição enviado para:", email);
 
     return { 
@@ -211,12 +189,10 @@ export const sendPasswordResetAction = async (email: string) => {
   }
 };
 
-// ✅ LOGOUT SEGURO
 export const signOutAction = async () => {
   try {
     await signOut(auth);
     
-    // ✅ Log seguro
     console.log("Usuário deslogado com sucesso");
     
     return { success: true };
@@ -234,13 +210,11 @@ export const signOutAction = async () => {
   }
 };
 
-// ✅ LOGIN COM GOOGLE
 export const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
 
-    // ✅ Salvar/atualizar usuário no Firestore
     await setDoc(doc(db, "users", user.uid), {
       email: user.email,
       name: user.displayName,
@@ -285,13 +259,11 @@ export const signInWithGoogle = async () => {
   }
 };
 
-// ✅ LOGIN COM GITHUB
 export const signInWithGitHub = async () => {
   try {
     const result = await signInWithPopup(auth, githubProvider);
     const user = result.user;
 
-    // ✅ Salvar/atualizar usuário no Firestore
     await setDoc(doc(db, "users", user.uid), {
       email: user.email,
       name: user.displayName,
