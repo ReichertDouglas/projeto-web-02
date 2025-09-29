@@ -1,20 +1,37 @@
+import { auth } from "@/lib/firebase/firebaseconfig";
+import { signOut } from "firebase/auth";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export const Navbar = () => {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/login"); // redireciona depois do logout
+    } catch (error) {
+      console.error("Erro ao sair:", error);
+    }
+  };
+
   return (
     <div className="w-full min-h-fit text-xl rounded-xl font-semibold bg-white/70 text-emerald-800 flex p-4 mb-10">
-      <div className="flex gap-10 w-full justify-center">
+      <div className="flex gap-10 w-full justify-center mr-10">
         <Link href="/dashboard" className="w-3/12 py-1 hover:bg-black/10 rounded-xl text-center">
           Dashboard
         </Link>
-        <Link href="/home" className="w-3/12 py-1 hover:bg-black/10 rounded-xl text-center">
+        <Link href="/receita-despesa" className="w-3/12 py-1 hover:bg-black/10 rounded-xl text-center">
           Receita/Despesa
         </Link>
-        <Link href="/profile" className="w-3/12 py-1 hover:bg-black/10 rounded-xl text-center">Perfil</Link>
+        <Link href="/contas" className="w-3/12 py-1 hover:bg-black/10 rounded-xl text-center">
+          Contas
+        </Link>
+        <Link href="/perfil" className="w-3/12 py-1 hover:bg-black/10 rounded-xl text-center">Perfil</Link>
       </div>
-      <Link href="/" className="w-3/12 py-1 bg-emerald-800 rounded-xl text-center text-white">
+      <button className="w-3/12 py-1 bg-emerald-800 rounded-xl text-center text-white hover:cursor-pointer" onClick={handleLogout}>
         Logout
-      </Link>
+      </button>
     </div>
   );
 };

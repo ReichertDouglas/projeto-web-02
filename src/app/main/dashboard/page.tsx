@@ -4,28 +4,114 @@ import { cotacao, getCripto, getDolar } from "@/app/api";
 import { PizzaGraph } from "@/components/features/dashboard/PizzaGraph";
 import { Header } from "@/components/shared/header";
 import { Navbar } from "@/components/shared/navbar/page";
+import { auth, db } from "@/lib/firebase/firebaseconfig";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { TrendingDown, TrendingUp } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
+interface Transaction {
+  id: string;
+  value: number;
+  type: "receita" | "despesa";
+  category: string;
+  createdAt?: unknown;
+}
+interface Bill {
+  id: string;
+  description: string;
+  value: number;
+  dueDate: string;
+  createdAt?: unknown;
+}
+
 export default function DashboardPage() {
-  // Mock de dados – substitua depois por chamadas reais
-  const [overview] = useState({
-    receitas: 8500,
-    despesas: 5600,
-  });
-  const saldo = overview.receitas - overview.despesas;
-
-  const [despesasCategoria] = useState([
-    { categoria: "Alimentação", valor: 1800 },
-    { categoria: "Transporte", valor: 700 },
-    { categoria: "Lazer", valor: 500 },
-    { categoria: "Moradia", valor: 2600 },
-    { categoria: "Faculdade", valor: 600 },
+  const router = useRouter();
+  const [balance, setBalance] = useState(0);
+  const [income, setIncome] = useState(0);
+  const [expense, setExpense] = useState(0);
+  const [bills, setBills] = useState<Bill[]>([]);
+  const [despesasCategoria, setDespesasCategoria] = useState([
+    { categoria: "Alimentação", valor: 0 },
+    { categoria: "Transporte", valor: 0 },
+    { categoria: "Moradia", valor: 0 },
+    { categoria: "Lazer", valor: 0 },
+    { categoria: "Educação", valor: 0 },
+    { categoria: "Saúde", valor: 0 },
+    { categoria: "Outros", valor: 0 },
   ]);
 
-  const [alertas] = useState([
-    { id: 1, nome: "Conta de luz", vencimento: "25/09/2025", valor: 230 },
-    { id: 2, nome: "Internet", vencimento: "27/09/2025", valor: 120 },
-  ]);
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    const q = query(
+      collection(db, "transactions", user.uid, "items"),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      let total = 0;
+      let receita = 0;
+      let despesa = 0;
+
+      const categorias = [
+        { categoria: "Alimentação", valor: 0 },
+        { categoria: "Transporte", valor: 0 },
+        { categoria: "Moradia", valor: 0 },
+        { categoria: "Lazer", valor: 0 },
+        { categoria: "Educação", valor: 0 },
+        { categoria: "Saúde", valor: 0 },
+        { categoria: "Outros", valor: 0 },
+      ];
+
+      snapshot.forEach((doc) => {
+        const data = doc.data() as Transaction;
+
+        if (data.type === "receita") {
+          receita += data.value;
+        } else if (data.type === "despesa") {
+          despesa += data.value;
+
+          // Atualiza a categoria correspondente
+          const catIndex = categorias.findIndex(
+            (c) => c.categoria === data.category
+          );
+          if (catIndex >= 0) {
+            categorias[catIndex].valor += data.value;
+          }
+        }
+      });
+
+      total = receita - despesa;
+
+      setBalance(total);
+      setIncome(receita);
+      setExpense(despesa);
+      setDespesasCategoria(categorias);
+    });
+    const qry = query(
+      collection(db, "bills", user.uid, "items"),
+      orderBy("dueDate", "asc")
+    );
+
+    const bills = onSnapshot(qry, (snapshot) => {
+      const docs: Bill[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data() as Omit<Bill, "id">;
+        docs.push({ id: doc.id, ...data });
+      });
+      setBills(docs);
+    });
+
+    return () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      unsubscribe(), bills();
+    };
+  }, [router]);
 
   const [dolar, setDolar] = useState<string>("Carregando...");
   const [cripto, setCripto] = useState<cotacao>();
@@ -49,9 +135,9 @@ export default function DashboardPage() {
     async function fetchCripto() {
       try {
         const valor = await getCripto();
-        console.log(valor)
+        console.log(valor);
         if (valor !== "Cotação não encontrada") {
-          setCripto(valor)
+          setCripto(valor);
         } else {
           console.log("Cotação não encontrada");
         }
@@ -64,13 +150,19 @@ export default function DashboardPage() {
     fetchCripto();
     fetchDolar();
   }, []);
-  
-  useEffect(()=>{
-    setBtc(parseFloat(cripto?.BTCUSD.bid || "0"))
-    setEth(parseFloat(cripto?.ETHUSD.bid || "0"))
-  }, [cripto])
 
-  
+  useEffect(() => {
+    setBtc(parseFloat(cripto?.BTCUSD.bid || "0"));
+    setEth(parseFloat(cripto?.ETHUSD.bid || "0"));
+  }, [cripto]);
+
+  const isDueSoon = (dueDate: string) => {
+    const today = new Date();
+    const due = new Date(dueDate);
+    const diffTime = due.getTime() - today.getTime();
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+    return diffDays <= 3; // até 3 dias de antecedência
+  };
 
   return (
     <div className="min-h-screen bg-emerald-300 text-emerald-800 font-serif p-9">
@@ -81,18 +173,18 @@ export default function DashboardPage() {
         <section className="grid gap-6 md:grid-cols-3 mb-10">
           <Card
             title="Receitas"
-            value={`R$ ${overview.receitas.toFixed(2)}`}
+            value={`R$ ${income.toFixed(2)}`}
             color="text-green-700"
           />
           <Card
             title="Despesas"
-            value={`R$ ${overview.despesas.toFixed(2)}`}
+            value={`R$ ${expense.toFixed(2)}`}
             color="text-red-600"
           />
           <Card
             title="Saldo Atual"
-            value={`R$ ${saldo.toFixed(2)}`}
-            color={saldo >= 0 ? "text-green-700" : "text-red-700"}
+            value={`R$ ${balance.toFixed(2)}`}
+            color={balance >= 0 ? "text-green-700" : "text-red-700"}
           />
         </section>
 
@@ -116,10 +208,21 @@ export default function DashboardPage() {
               </thead>
               <tbody>
                 {despesasCategoria.map((d) => (
-                  <tr key={d.categoria} className="border-b last:border-none">
-                    <td className="py-2">{d.categoria}</td>
-                    <td className="py-2">R$ {d.valor.toFixed(2)}</td>
-                  </tr>
+                  <>
+                    {d.valor !== 0 ? (
+                      <>
+                        <tr
+                          key={d.categoria}
+                          className="border-b last:border-none"
+                        >
+                          <td className="py-2">{d.categoria}</td>
+                          <td className="py-2">R$ {d.valor.toFixed(2)}</td>
+                        </tr>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                  </>
                 ))}
               </tbody>
             </table>
@@ -129,21 +232,24 @@ export default function DashboardPage() {
         {/* Alertas de Vencimentos */}
         <section className="bg-white/70 shadow rounded-2xl p-6 mb-10">
           <h2 className="text-xl font-semibold mb-4">Contas a Vencer</h2>
-          {alertas.length === 0 ? (
+          {bills.length === 0 ? (
             <p className="text-emerald-800">
               Nenhuma conta próxima do vencimento.
             </p>
           ) : (
             <ul className="space-y-3">
-              {alertas.map((a) => (
+              {bills.map((a) => (
                 <li
                   key={a.id}
-                  className="flex justify-between text-lg border-b pb-2 last:border-none"
+                  className={`flex justify-between text-lg border-b pb-2 last:border-none ${
+                    isDueSoon(a.dueDate) ? "text-red-600" : ""
+                  }`}
                 >
                   <span>
-                    {a.nome} – {a.vencimento}
+                    {a.description} –{" "}
+                    {new Date(a.dueDate).toLocaleDateString("pt-BR")}
                   </span>
-                  <span className="font-semibold">R$ {a.valor.toFixed(2)}</span>
+                  <span className="font-semibold">R$ {a.value.toFixed(2)}</span>
                 </li>
               ))}
             </ul>
@@ -156,15 +262,41 @@ export default function DashboardPage() {
           <div className="flex gap-10">
             <div>
               <p className="text-sm text-emerald-800">Dólar (USD)</p>
-              <p className="text-lg font-bold">{dolar.replaceAll(".",",")}</p>
+              <p className="text-lg font-bold">{dolar.replaceAll(".", ",")}</p>
             </div>
             <div>
               <p className="text-sm text-emerald-800">Bitcoin</p>
-              <p className="text-lg font-bold">$ {btc?.toLocaleString("pt-br")}</p>
+              <p
+                className={`text-lg font-bold ${
+                  parseInt(cripto?.BTCUSD.pctChange || "0") > 0
+                    ? ""
+                    : "text-red-600"
+                }`}
+              >
+                $ {btc?.toLocaleString("pt-br")}{" "}
+                {parseFloat(cripto?.BTCUSD.pctChange || "0") > 0 ? (
+                  <TrendingUp className="inline-block w-4 h-4 ml-1 fill-green-600" />
+                ) : (
+                  <TrendingDown className="inline-block w-4 h-4 ml-1 fill-red-600" />
+                )}
+              </p>
             </div>
             <div>
               <p className="text-sm text-emerald-800">Ethereum</p>
-              <p className="text-lg font-bold">$ {eth?.toLocaleString("pt-br")}</p>
+              <p
+                className={`text-lg font-bold ${
+                  parseInt(cripto?.ETHUSD.pctChange || "0") > 0
+                    ? ""
+                    : "text-red-600"
+                }`}
+              >
+                $ {eth?.toLocaleString("pt-br")}
+                {parseFloat(cripto?.ETHUSD.pctChange || "0") > 0 ? (
+                  <TrendingUp className="inline-block w-4 h-4 ml-1 fill-green-600" />
+                ) : (
+                  <TrendingDown className="inline-block w-4 h-4 ml-1 fill-red-600" />
+                )}
+              </p>
             </div>
           </div>
         </section>

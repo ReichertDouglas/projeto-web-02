@@ -1,9 +1,17 @@
 "use client";
 
-import { type LoginFormData, loginSchema } from "../../../lib/validation/loginschema";
+import {
+  type LoginFormData,
+  loginSchema,
+} from "../../../lib/validation/loginschema";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import { sendPasswordResetAction, signInAction, signInWithGitHub, signInWithGoogle } from "../../../lib/actions/useauth";
+import {
+  sendPasswordResetAction,
+  signInAction,
+  signInWithGitHub,
+  signInWithGoogle,
+} from "../../../lib/actions/useauth";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, Lock, Eye, EyeOff, Github, Loader2 } from "lucide-react";
@@ -14,7 +22,9 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [loadingProvider, setLoadingProvider] = useState<"google" | "github" | null>(null);
+  const [loadingProvider, setLoadingProvider] = useState<
+    "google" | "github" | null
+  >(null);
 
   const {
     control,
@@ -28,8 +38,11 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     setError(null);
-    setSuccess(null)
+    setSuccess(null);
     const result = await signInAction(data);
+    if (result.user?.uid !== undefined) {
+          localStorage.setItem("uid", result.user?.uid);
+        }
     if (!result.success) {
       setError(result.error || "Falha no login.");
     } else {
@@ -49,7 +62,9 @@ export default function LoginPage() {
 
     const result = await sendPasswordResetAction(email);
     if (result.success) {
-      setSuccess(result.message ?? "E-mail de recuperação enviado com sucesso!");
+      setSuccess(
+        result.message ?? "E-mail de recuperação enviado com sucesso!"
+      );
     } else {
       setError(result.error ?? "Erro ao enviar e-mail de recuperação.");
     }
@@ -64,6 +79,9 @@ export default function LoginPage() {
       const result = await signInWithGoogle();
       if (result.success) {
         setSuccess("Login com Google realizado com sucesso!");
+        if (result.user?.uid !== undefined) {
+          localStorage.setItem("uid", result.user?.uid);
+        }
         setTimeout(() => router.push("/dashboard"), 1000);
       } else {
         setError(result.error || "Falha no login com Google.");
@@ -83,9 +101,12 @@ export default function LoginPage() {
 
     try {
       const result = await signInWithGitHub();
-      console.log(result)
+      console.log(result);
       if (result.success) {
         setSuccess("Login com GitHub realizado com sucesso!");
+        if (result.user?.uid !== undefined) {
+          localStorage.setItem("uid", result.user?.uid);
+        }
         setTimeout(() => router.push("/dashboard"), 1000);
       } else {
         setError(result.error || "Falha no login com GitHub.");
@@ -103,13 +124,20 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white/70 shadow-xl rounded-2xl text-emerald-800 p-8">
         <h2 className="text-3xl font-semibold text-center mb-6">Login</h2>
 
-        {error && <p className="text-sm text-red-600 text-center mb-2">{error}</p>}
-        {success && <p className="text-sm text-green-600 text-center mb-2">{success}</p>}
+        {error && (
+          <p className="text-sm text-red-600 text-center mb-2">{error}</p>
+        )}
+        {success && (
+          <p className="text-sm text-green-600 text-center mb-2">{success}</p>
+        )}
 
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-slate-700"
+            >
               E-mail
             </label>
             <div className="relative mt-1">
@@ -131,13 +159,18 @@ export default function LoginPage() {
               />
             </div>
             {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.email.message}
+              </p>
             )}
           </div>
 
           {/* Senha */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-slate-700"
+            >
               Senha
             </label>
             <div className="relative mt-1">
@@ -170,7 +203,9 @@ export default function LoginPage() {
               </button>
             </div>
             {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.password.message}
+              </p>
             )}
           </div>
 
