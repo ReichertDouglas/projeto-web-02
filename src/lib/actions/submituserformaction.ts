@@ -10,6 +10,7 @@ export const submitUserForm = async (data: SignupFormData) => {
   try {
     const signUpResult = await signUpWithEmailAndPassword({
       name: data.name,
+      cpf: data.cpf,
       email: data.email,
       password: data.password,
       confirmPassword: data.confirmPassword,
@@ -22,6 +23,7 @@ export const submitUserForm = async (data: SignupFormData) => {
     await addDoc(collection(db, "usuarios"), {
       email: data.email,
       password: data.password,
+      cpf: data.cpf,
       createdAt: new Date(),
     });
 
