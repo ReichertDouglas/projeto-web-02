@@ -30,8 +30,8 @@ export default function Profile() {
         <Header />
         <Navbar />
       </div>
-      <div className="max-w-6xl mx-auto text-xl rounded-xl bg-white/70 text-emerald-800 flex p-10 mb-10">
-        <div>
+      <div className="max-w-6xl mx-auto text-xl rounded-xl bg-white/70 text-emerald-800 flex p-4 md:p-10 mb-10">
+        <div className="w-full">
           <Image
             src={user?.photoURL ?? defaultProfile}
             alt="Foto de perfil"
@@ -42,7 +42,7 @@ export default function Profile() {
           <p className="font-semibold mt-4">Nome:</p>
           <p>{user?.displayName}</p>
           <p className="font-semibold mt-4">E-mail:</p>
-          <p>{user?.email}</p>
+          <p className="break-words">{user?.email}</p>
         </div>
       </div>
     </div>

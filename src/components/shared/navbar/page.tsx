@@ -16,8 +16,8 @@ export const Navbar = () => {
   };
 
   return (
-    <div className="w-full min-h-fit text-xl rounded-xl font-semibold bg-white/70 text-emerald-800 flex p-4 mb-10">
-      <div className="flex gap-10 w-full justify-center mr-10">
+    <div className="w-full min-h-fit text-xl rounded-xl font-semibold bg-white/70 text-emerald-800 flex justify-between p-4 mb-10">
+      <div className="flex flex-col md:flex-row gap-1 md:gap-10 w-fit md:w-full justify-center mr-10">
         <Link href="/dashboard" className="w-3/12 py-1 hover:bg-black/10 rounded-xl text-center">
           Dashboard
         </Link>
@@ -29,7 +29,7 @@ export const Navbar = () => {
         </Link>
         <Link href="/perfil" className="w-3/12 py-1 hover:bg-black/10 rounded-xl text-center">Perfil</Link>
       </div>
-      <button className="w-3/12 py-1 bg-emerald-800 rounded-xl text-center text-white hover:cursor-pointer" onClick={handleLogout}>
+      <button className="w-fit px-2 md:w-3/12 py-1 bg-emerald-800 rounded-xl text-center text-white hover:cursor-pointer" onClick={handleLogout}>
         Logout
       </button>
     </div>
