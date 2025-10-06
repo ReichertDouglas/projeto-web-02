@@ -7,7 +7,7 @@ import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
   signOut,
-  updateProfile
+  updateProfile,
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
@@ -18,47 +18,53 @@ import { signInWithPopup } from "firebase/auth";
 export const signUpWithEmailAndPassword = async (data: SignupFormData) => {
   try {
     console.log("Tentativa de cadastro para:", data.email);
-    
+
     if (!data.email || !data.password) {
       return { success: false, error: "Email e senha são obrigatórios." };
     }
- 
+
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       data.email,
       data.password
     );
-    
+
     const user = userCredential.user;
-    
+
     if (data.name) {
       await updateProfile(user, {
-        displayName: data.name
+        displayName: data.name,
       });
     }
-    
+
     await sendEmailVerification(user);
-    
-    await setDoc(doc(db, "users", user.uid), {
-      email: data.email,
-      name: data.name || "",
-      cpf: data.cpf || "",
-      emailVerified: false,
-      createdAt: serverTimestamp(),
-      lastLogin: serverTimestamp(),
-      provider: "email",
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-    
+
+    await setDoc(
+      doc(db, "users", user.uid),
+      {
+        email: data.email,
+        name: data.name || "",
+        cpf: data.cpf || "",
+        emailVerified: false,
+        createdAt: serverTimestamp(),
+        lastLogin: serverTimestamp(),
+        provider: "email",
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+
     console.log("Usuário cadastrado com sucesso:", user.uid);
 
-    return { 
-      success: true, 
-      message: "Conta criada com sucesso! Verifique seu e-mail." 
+    return {
+      success: true,
+      message: "Conta criada com sucesso! Verifique seu e-mail.",
     };
-
   } catch (error) {
-    console.error("Erro no cadastro:", error instanceof Error ? error.message : "Erro desconhecido");
+    console.error(
+      "Erro no cadastro:",
+      error instanceof Error ? error.message : "Erro desconhecido"
+    );
 
     let errorMessage = "Ocorreu um erro ao criar a conta.";
 
@@ -95,30 +101,49 @@ export const signInAction = async (data: LoginFormData) => {
     }
 
     const userCredential = await signInWithEmailAndPassword(
-      auth, 
-      data.email, 
+      auth,
+      data.email,
       data.password
     );
 
     const user = userCredential.user;
 
-    await setDoc(doc(db, "users", user.uid), {
-      lastLogin: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    }, { merge: true });
+    if (!user.emailVerified) {
+      signOutAction();
+      return {
+        success: false,
+        user: {
+          uid: "",
+          email: "",
+          name: "",
+          emailVerified: false,
+        },
+      };
+    }
 
-    return { 
+    await setDoc(
+      doc(db, "users", user.uid),
+      {
+        lastLogin: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    return {
       success: true,
       user: {
         uid: user.uid,
         email: user.email,
         name: user.displayName,
-        emailVerified: user.emailVerified
-      }
+        emailVerified: user.emailVerified,
+      },
     };
-
   } catch (error) {
-    console.error("Erro no login:", error instanceof Error ? error.message : "Erro desconhecido");
+    console.error(
+      "Erro no login:",
+      error instanceof Error ? error.message : "Erro desconhecido"
+    );
 
     let errorMessage = "Ocorreu um erro ao tentar fazer login.";
 
@@ -133,7 +158,8 @@ export const signInAction = async (data: LoginFormData) => {
           errorMessage = "Esta conta foi desativada.";
           break;
         case "auth/too-many-requests":
-          errorMessage = "Muitas tentativas. Tente novamente em alguns minutos.";
+          errorMessage =
+            "Muitas tentativas. Tente novamente em alguns minutos.";
           break;
         case "auth/invalid-email":
           errorMessage = "O e-mail informado é inválido.";
@@ -152,7 +178,7 @@ export const signInAction = async (data: LoginFormData) => {
 
 export const sendPasswordResetAction = async (email: string) => {
   try {
-    if (!email || !email.includes('@')) {
+    if (!email || !email.includes("@")) {
       return { success: false, error: "Por favor, informe um e-mail válido." };
     }
 
@@ -160,11 +186,10 @@ export const sendPasswordResetAction = async (email: string) => {
 
     console.log("Email de redefinição enviado para:", email);
 
-    return { 
-      success: true, 
-      message: "E-mail de redefinição enviado! Verifique sua caixa de entrada." 
+    return {
+      success: true,
+      message: "E-mail de redefinição enviado! Verifique sua caixa de entrada.",
     };
-
   } catch (error) {
     console.error("Erro ao enviar redefinição:", error);
 
@@ -182,7 +207,8 @@ export const sendPasswordResetAction = async (email: string) => {
           errorMessage = "Muitas tentativas. Tente novamente mais tarde.";
           break;
         default:
-          errorMessage = "Erro ao enviar e-mail de redefinição. Tente novamente.";
+          errorMessage =
+            "Erro ao enviar e-mail de redefinição. Tente novamente.";
       }
     }
 
@@ -193,11 +219,10 @@ export const sendPasswordResetAction = async (email: string) => {
 export const signOutAction = async () => {
   try {
     await signOut(auth);
-    
-    console.log("Usuário deslogado com sucesso");
-    
-    return { success: true };
 
+    console.log("Usuário deslogado com sucesso");
+
+    return { success: true };
   } catch (error) {
     console.error("Erro no logout:", error);
 
@@ -216,15 +241,19 @@ export const signInWithGoogle = async () => {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
 
-    await setDoc(doc(db, "users", user.uid), {
-      email: user.email,
-      name: user.displayName,
-      photoURL: user.photoURL,
-      emailVerified: user.emailVerified,
-      provider: "google",
-      lastLogin: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    }, { merge: true });
+    await setDoc(
+      doc(db, "users", user.uid),
+      {
+        email: user.email,
+        name: user.displayName,
+        photoURL: user.photoURL,
+        emailVerified: user.emailVerified,
+        provider: "google",
+        lastLogin: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
 
     return {
       success: true,
@@ -233,10 +262,9 @@ export const signInWithGoogle = async () => {
         email: user.email,
         name: user.displayName,
         photoURL: user.photoURL,
-        emailVerified: user.emailVerified
-      }
+        emailVerified: user.emailVerified,
+      },
     };
-
   } catch (error) {
     console.error("Erro no login com Google:", error);
 
@@ -265,15 +293,19 @@ export const signInWithGitHub = async () => {
     const result = await signInWithPopup(auth, githubProvider);
     const user = result.user;
 
-    await setDoc(doc(db, "users", user.uid), {
-      email: user.email,
-      name: user.displayName,
-      photoURL: user.photoURL,
-      emailVerified: user.emailVerified,
-      provider: "github",
-      lastLogin: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    }, { merge: true });
+    await setDoc(
+      doc(db, "users", user.uid),
+      {
+        email: user.email,
+        name: user.displayName,
+        photoURL: user.photoURL,
+        emailVerified: user.emailVerified,
+        provider: "github",
+        lastLogin: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
 
     return {
       success: true,
@@ -282,10 +314,9 @@ export const signInWithGitHub = async () => {
         email: user.email,
         name: user.displayName,
         photoURL: user.photoURL,
-        emailVerified: user.emailVerified
-      }
+        emailVerified: user.emailVerified,
+      },
     };
-
   } catch (error) {
     console.error("Erro no login com GitHub:", error);
 

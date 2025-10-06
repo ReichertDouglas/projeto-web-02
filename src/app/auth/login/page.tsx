@@ -40,18 +40,18 @@ export default function LoginPage() {
     setError(null);
     setSuccess(null);
     const result = await signInAction(data);
-    if (result.success  && result.user?.emailVerified) {
+    if (!result.user?.emailVerified) {
+      setError("Verifique seu e-mail e tente novamente");
+      return;
+    }
+    if (result.success && result.user?.emailVerified) {
       setSuccess("Login realizado com sucesso!");
       if (result.user?.uid !== undefined) {
         localStorage.setItem("uid", result.user?.uid);
       }
       setTimeout(() => router.push("/dashboard"), 1000);
     } else {
-      if (!result.user?.emailVerified) {
-        setError("Verifique seu e-mail e tente novamente");
-      } else {
-        setError(result.error || "Falha no login.");
-      }
+      setError(result.error || "Falha no login.");
     }
   };
 
@@ -82,7 +82,7 @@ export default function LoginPage() {
 
     try {
       const result = await signInWithGoogle();
-      if (result.success  && result.user?.emailVerified) {
+      if (result.success && result.user?.emailVerified) {
         setSuccess("Login com Google realizado com sucesso!");
         if (result.user?.uid !== undefined) {
           localStorage.setItem("uid", result.user?.uid);
