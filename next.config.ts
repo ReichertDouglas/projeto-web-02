@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       {source: '/perfil', destination:'/main/profile'},
       {source: '/receita-despesa', destination:'/main/income-expense'},
       {source: '/contas', destination:'/main/bills'},
+      {source: '/extrato', destination:'/main/extract'},
     ]
   },
   images: {
